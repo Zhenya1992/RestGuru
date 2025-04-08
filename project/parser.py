@@ -1,10 +1,10 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
-from bs4 import BeautifulSoup
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 import time
+from pathlib import Path
 
 
 # Настройка Selenium
@@ -28,9 +28,9 @@ def parser_restaurants():
     """Парсинг списков ресторанов(id, название и ссылка) и возвращает данные в виде списка словарей"""
 
     driver = setup_driver()
-    url = 'https://restaurantguru.ru/Mazyr#restaurant-list'
+    url = 'https://restaurantguru.ru/Mazyr'
     driver.get(url)
-    time.sleep(5)
+    time.sleep(3)
 
     for _ in range(5):
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
@@ -62,13 +62,18 @@ def parser_restaurants():
     return restaurants
 
 
-def save_to_file(data, output_file='restaurant_Mozyr.md'):
+def save_to_file(data, output_dir=None, output_file='restaurants_Mozyr.md'):
     if not data:
         print("Ошибка: нет данных")
         return
+    if output_dir is None:
+        output_dir = Path.cwd() / "pre_data"
 
-    with open(output_file, 'w', encoding='UTF-8') as file:
-        file.write("# 📌 Список ресторанов Мозырь\n\n")
+    output_path = Path(output_dir) / output_file
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    with output_path.open('w', encoding='utf-8') as file:
+        file.write("# 📌 Список ресторанов \n\n")
         file.write("| №  | Название | ID | Ссылка |\n")
         file.write("|----|----------|----|--------|\n")
 
@@ -77,13 +82,12 @@ def save_to_file(data, output_file='restaurant_Mozyr.md'):
             restaurant_id = row.get("ID", "").strip() or "N/A"
             link = row.get("Ссылка", "").strip()
 
-            if link:
-                name_link = f"[{name}]({link})"
-                link_md = f"[Ссылка]({link})"
-            else:
-                name_link = name
-                link_md = "Нет ссылки"
+            name_link = f"[{name}]({link})" if link else name
+            link_md = f"[Ссылка]({link})" if link else "Нет ссылки"
 
             file.write(f"| {idx} | {name_link} | {restaurant_id} | {link_md} |\n")
 
-    print(f"✅ Данные успешно сохранены в {output_file}")
+    print(f"✅ Данные успешно сохранены в {output_path}")
+
+res = parser_restaurants()
+save_to_file(res)
