@@ -1,3 +1,18 @@
-.idea
+# ▶️ Virtual environments
 venv/
-restaurant_Mozyr.md
+
+# ▶️ Python bytecode
+pycache/
+*.py[cod]
+*.pyo
+*.pyd
+
+.idea/
+
+# ▶️ Md and CSV
+*.md
+!README.md
+*.csv
+
+# ▶️ Playwright
+playwright/.cache/
